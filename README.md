@@ -16,15 +16,15 @@ from Dm7jdbcDriver17 import DM7Driver
 dmd = DM7Driver(configFile="DB_config.ini", attributeName="DM7JDBC_connect")
 
 # 数据库连接
-dmd.connectDM()
+dmd.connect()
 
 # 数据表数据查询
-df = dmd.selectSQL("SG_ORG_SUBAREA_B")
+df = dmd.select("SG_ORG_SUBAREA_B")
 print(df)
 
 # 数据表数据清空
-print(dmd.deleteSQL("SG_ORG_SUBAREA_B"))
+print(dmd.delete("SG_ORG_SUBAREA_B"))
 
 # 数据表数据插入
-print(dmd.insertSQL(df, "SG_ORG_SUBAREA_B"))
+print(dmd.insert(df, "SG_ORG_SUBAREA_B"))
 ```

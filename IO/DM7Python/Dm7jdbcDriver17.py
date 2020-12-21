@@ -26,7 +26,7 @@ class DM7Driver(object):
         self.__config = configparser.ConfigParser()
         self.__config.read(folder_path+"/config/{configFile}".format(configFile=configFile))
 
-    def connectDM(self):
+    def connect(self):
         """数据库连接"""
         self.conn = jaydebeapi.connect(
             self.__config[self.attributeName]['jdbcString'],
@@ -37,7 +37,7 @@ class DM7Driver(object):
         self.curs = self.conn.cursor()
 
 
-    def selectSQL(self, tableName, sql=None):
+    def select(self, tableName, sql=None):
         """执行 SELECT 语句
             
         Args: 
@@ -60,7 +60,7 @@ class DM7Driver(object):
             print("出错语句: {}".format(sql))
             return pd.DataFrame()
 
-    def insertSQL(self, df, tableName, sql=None):
+    def insert(self, df, tableName, sql=None):
         """执行 INSERT INTO 语句
             
         Args: 
@@ -88,7 +88,7 @@ class DM7Driver(object):
             print("出错语句: {}".format(sql))
             return 0
 
-    def deleteSQL(self, tableName, sql=None):    
+    def delete(self, tableName, sql=None):    
         """执行 DELETE 语句
             
         Args: 
