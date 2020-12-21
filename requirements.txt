@@ -1,0 +1,9 @@
+configparser==5.0.1
+JayDeBeApi==1.2.3
+JPype1==1.2.0
+numpy==1.19.4
+pandas==1.1.5
+python-dateutil==2.8.1
+pytz==2020.4
+redis==3.5.3
+six==1.15.0
