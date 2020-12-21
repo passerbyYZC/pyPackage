@@ -2,102 +2,108 @@
 """
     Author: Yao Z.C.
     Date: 2020-10-03 22:43:03
-    LastEditTime: 2020-12-21 09:53:41
+    LastEditTime: 2020-12-21 14:29:31
     FilePath: /pyPackage/IO/DM7Python/Dm7jdbcDriver17.py
 """
-import os
 import jaydebeapi
+import configparser
 import pandas as pd
+import os
+folder_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".")
 
-
-def connectDM(configFile="DB_config.ini", attributeName="DM7JDBC_connect"):
-    """连接DM7数据库
+class DM7Driver(object):
+    """DM7数据库操作驱动
         
     Args: 
         configFile: 数据库配置信息文件名
         attributeName: 配置属性名称
         
-    Returns: 
-        conn: 连接器
-        curs: 游标
     """
+    conn = None
+    curs = None
+    def __init__(self, configFile, attributeName):
+        self.attributeName = attributeName
+        self.__config = configparser.ConfigParser()
+        self.__config.read(folder_path+"/config/{configFile}".format(configFile=configFile))
 
-    path = os.getcwd()
-    config = 
-    conn = jaydebeapi.connect(
-        config[attributeName]['jdbcString'],
-        config[attributeName]['urlString'],
-        [config[attributeName]['userName'], config[attributeName]['password']],
-        config[attributeName]['DMJdbcDriver']
-    )
-    curs = conn.cursor()
-    return conn,curs
+    def connectDM(self):
+        """数据库连接"""
+        self.conn = jaydebeapi.connect(
+            self.__config[self.attributeName]['jdbcString'],
+            self.__config[self.attributeName]['urlString'],
+            [self.__config[self.attributeName]['userName'], self.__config[self.attributeName]['password']],
+            folder_path + self.__config[self.attributeName]['DMJdbcDriver']
+        )
+        self.curs = self.conn.cursor()
 
-def selectSQL(curs, sql, colnames):
-    """执行 SELECT 语句
-        
-    Args: 
-        curs: 游标
-        sql:  SELECT 语句
-        colnames: 查询返回结果列名
 
-    Returns: 
-        df: SQL语句执行结果，数据类型为：pandas.DataFrame() 
-    """
-    try:
-        curs.execute(sql)
-        result_info = curs.fetchall()
-    except IOError:
-        print("Error: 从数据库读取数据失败!!!")
-    finally:
-		#数据转换成为DataFrame
-        data_list = [list(x) for x in result_info]        
-        df = pd.DataFrame(data = data_list, columns=colnames)
-        df.fillna(None, inplace=True)
-        return df
+    def selectSQL(self, tableName, sql=None):
+        """执行 SELECT 语句
+            
+        Args: 
+            tableName: 数据表名称
+            sql: SELECT 语句模板
 
-def insertSQL(conn, curs, sql, df):
-    """执行 INSERT INTO 语句
-        
-    Args: 
-        curs: 游标
-        sql:  INSERT INTO 语句
+        Returns: 
+            df: SQL语句执行结果，数据类型为：pandas.DataFrame() 
+        """
+        sql = self.__config["Select_sql"]["select_df"].format(table_name=tableName) if sql == None else sql
+        try:
+            self.curs.execute(sql)
+            data_list = [list(x) for x in self.curs.fetchall()]  
+            self.curs.execute(self.__config["Select_sql"]["columns_name"].format(table_name=tableName))
+            colnames = [x[0] for x in self.curs.fetchall()]   
+            df = pd.DataFrame(data=data_list, columns=colnames)
+            return df
+        except:
+            print("Error: 数据表{table_name}读取数据失败!!!".format(table_name=tableName))
+            print("出错语句: {}".format(sql))
+            return pd.DataFrame()
 
-    Returns: 
-        插入成功标识，0:失败; 1:成功
-    """
-    columns_str = ", ".join(str(x) for x in df.columns.tolist())
-    sql = sql.replace("columns_name", columns_str)
+    def insertSQL(self, df, tableName, sql=None):
+        """执行 INSERT INTO 语句
+            
+        Args: 
+            df: 需插入的DataFrame数据
+            tableName: 数据表名称
+            sql: INSERT INTO 语句模板
 
-    data_str = ""
-    for ind in df.index:
-        data_temp = "'"+"', '".join(str(x) for x in df.loc[ind, :].tolist())
-        data_str += data_temp+"'),("
-    sql = sql.replace("row_data", data_str).replace("nan", "").replace("None", "").replace(",()", "")
-    try:
-        curs.execute(sql)
-    except IOError:
-        print("Error: 插入数据到数据库失败!!!")
-        print("出错语句: {}".format(sql))
-        return 0
-    conn.commit()  # 提交到数据库执行 
-    return 1
+        Returns: 
+            插入成功标识，0:失败; 1:成功
+        """
+        if sql == None:
+            columns_str = ", ".join(str(x) for x in df.columns.tolist())
+            data_str = ""
+            for ind in df.index:
+                data_temp = "'"+"', '".join(str(x) for x in df.loc[ind, :].tolist())
+                data_str += data_temp+"'),("
+            data_str = data_str.replace("nan", "").replace("None", "")
+            sql = self.__config["Insert_sql"]["insert_df"].format(table_name=tableName, columns_name=columns_str, row_data=data_str).replace(",()", "")
+        try:
+            self.curs.execute(sql)
+            self.conn.commit()  # 提交到数据库执行 
+            return 1
+        except:
+            print("Error: 数据表{table_name}插入数据失败!!!".format(table_name=tableName))
+            print("出错语句: {}".format(sql))
+            return 0
 
-def deleteSQL(conn, curs, sql):    
-    """执行 DELETE 语句
-        
-    Args: 
-        curs: 游标
-        sql:  DELETE 语句
+    def deleteSQL(self, tableName, sql=None):    
+        """执行 DELETE 语句
+            
+        Args: 
+            tableName: 数据表名称
+            sql: DELETE 语句模板
 
-    Returns: 
-        删除成功标识，0:失败; 1:成功
-    """
-    try:
-        curs.execute(sql)
-    except IOError:
-        print("Error: 从数据库删除数据失败!!!")
-        print("出错语句: {}".format(sql))
-        return 0
-    conn.commit()  # 提交到数据库执行 
-    return 1
+        Returns: 
+            删除成功标识，0:失败; 1:成功
+        """
+        sql = self.__config["Delete_sql"]["clean_table"].format(table_name=tableName) if sql == None else sql 
+        try:
+            self.curs.execute(sql)
+            self.conn.commit()  # 提交到数据库执行 
+            return 1
+        except:
+            print("Error: 数据表{table_name}删除数据失败!!!".format(table_name=tableName))
+            print("出错语句: {}".format(sql))
+            return 0
