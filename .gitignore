@@ -1,0 +1,5 @@
+/.vscode
+/venv
+/data/CIME/*
+/data/QS/*
+*.py[cod]
