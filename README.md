@@ -28,3 +28,19 @@ print(dmd.delete("SG_ORG_SUBAREA_B"))
 # 数据表数据插入
 print(dmd.insert(df, "SG_ORG_SUBAREA_B"))
 ```
+
+### 1.2. 数据读取器（CIME、DT）
+```
+sys.path.append(baseDir+"/IO/dataReader")
+
+## 引用 dataReader 类
+from dataReader import dataReader
+
+# 读取CIME文件
+cimeReader = dataReader(cimeFile)
+cimeReader.getdata()
+
+# 读取DT文件
+dtReader = dataReader(dtFile)
+dtReader.getdata()
+```
