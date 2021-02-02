@@ -31,6 +31,7 @@ print(dmd.insert(df, "SG_ORG_SUBAREA_B"))
 
 ### 1.2. 数据读取器（CIME、DT）
 ```
+## 添加 dataReader 包到工程目录
 sys.path.append(baseDir+"/IO/dataReader")
 
 ## 引用 dataReader 类
