@@ -39,9 +39,9 @@ from dataReader import dataReader
 
 # 读取CIME文件
 cimeReader = dataReader(cimeFile)
-cimeReader.getdata()
+cimeData_dict = cimeReader.getdata()
 
 # 读取DT文件
 dtReader = dataReader(dtFile)
-dtReader.getdata()
+dtData_dict = dtReader.getdata()
 ```
