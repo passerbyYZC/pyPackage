@@ -48,5 +48,6 @@ dtData_dict = dtReader.getdata()
 
 ## 依赖包下载语句
 ```
+pip freeze > requirements.txt
 pip download -d requirements -r requirements.txt --trusted-host mirrors.aliyun.com
 ```
