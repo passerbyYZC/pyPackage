@@ -1,10 +1,5 @@
 # python 公共函数包
 
-## 依赖包下载语句
-```
-pip download -d requirements -r requirements.txt --trusted-host mirrors.aliyun.com
-```
-
 ## 1. IO -- 数据输入输出包
 
 ### 1.1. 达梦7数据库
@@ -49,4 +44,9 @@ cimeData_dict = cimeReader.getdata()
 # 读取DT文件
 dtReader = dataReader(dtFile)
 dtData_dict = dtReader.getdata()
+```
+
+## 依赖包下载语句
+```
+pip download -d requirements -r requirements.txt --trusted-host mirrors.aliyun.com
 ```
