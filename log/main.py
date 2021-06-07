@@ -2,17 +2,26 @@
 """
     Author: Yao Z.C.
     Date: 2021-03-26 11:19:09
-    LastEditTime: 2021-03-29 10:10:27
-    FilePath: /pyPackage/IO/log/main.py
+    LastEditTime: 2021-06-07 14:15:56
+    FilePath: /pyPackage/log/main.py
 """
 import sys, os
-import logging
-import logging.config
+baseDir = os.getcwd().replace("\\","/")
 
-logging.config.fileConfig("config/logging_config.ini")
+# 获取负荷存储目录，如果目录不存在则创建该目录
+import configparser
+logConfig = configparser.ConfigParser()
+logConfig.read(os.path.join(baseDir, "config", "logConfig.ini"))
+
+logging_path = os.path.dirname(eval(logConfig["handler_fileHandler"]["args"])[0])
+if not os.path.exists(logging_path):
+    os.makedirs(logging_path)
+
+import logging, logging.config
+logging.config.fileConfig(os.path.join(baseDir, "config", "logConfig.ini"))
 logger = logging.getLogger("developer")
 
-from datetime import datetime
+from datetime import datetime, timedelta
 def write2log(func):
     def int_time(*args, **kwargs):
         time0 = datetime.now()
@@ -26,12 +35,11 @@ def write2log(func):
         return res
     return int_time
 
-
 logger.debug('This is debug message')
 logger.info('This is info message')
 logger.warning('This is warning message')
 
 try:
     a = 0/0
-except Exception as error:
+except:
     logger.exception(sys.exc_info())
