@@ -1,3 +1,9 @@
 /.vscode
 /venv
-*.py[cod]
+__pycache__
+*.log
+/model
+/packages
+/catboost_info
+/data
+/images
